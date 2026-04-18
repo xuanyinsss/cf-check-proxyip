@@ -1,6 +1,6 @@
 name = "cf-check-proxyip"  # 你的 Worker 名称
 main = "index.js"  # 入口文件，默认是 index.js
-compatibility_date = "2025-04-18"  # 设置兼容日期为去年同一天
+compatibility_date = "2026-04-07"  # 设置兼容日期为去年同一天
 
 [env.production]
 workers_dev = true  # 开发模式下使用 workers_dev，生产模式可以更改为自定义域
