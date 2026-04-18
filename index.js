@@ -106,6 +106,7 @@ td, th { padding:10px; border-bottom:1px solid #333; text-align:left; }
 .fast { color:#22c55e; }
 .mid { color:#facc15; }
 .slow { color:#ef4444; }
+#copyButton { float: left; margin-top: 20px; }
 </style>
 </head>
 <body>
@@ -119,7 +120,7 @@ example.com"></textarea>
 
 <br>
 <button onclick="start()">开始检测</button>
-<button onclick="copy()">一键复制</button>
+<button id="copyButton" onclick="copy()">一键复制</button>
 
 <table id="table">
 <thead>
@@ -156,6 +157,9 @@ async function start() {
   tbody.innerHTML = "";
   results = [];
 
+  // Disable button to prevent multiple clicks
+  document.querySelector('button').disabled = true;
+
   await Promise.all(lines.map(async ip => {
     const t0 = Date.now();
 
@@ -191,6 +195,9 @@ async function start() {
     \`;
     tbody.appendChild(row);
   }));
+
+  // Re-enable button after processing
+  document.querySelector('button').disabled = false;
 }
 
 function copy() {
