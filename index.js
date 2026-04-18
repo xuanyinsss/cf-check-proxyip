@@ -61,6 +61,35 @@ const scan = async (raw, to, rl) => {
   }
 };
 
+// IPv4 and IPv6 validation regex
+const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+
+// Check if it's IPv4 or IPv6
+const checkIpType = (ip) => {
+  if (ipv4Regex.test(ip)) {
+    return 'IPv4';
+  } else if (ipv6Regex.test(ip)) {
+    return 'IPv6';
+  } else {
+    return 'Domain';
+  }
+};
+
+// Domain resolution
+const resolveDomain = async (domain) => {
+  try {
+    const ip = await fetch(`https://dns.google/resolve?name=${domain}&type=A`);
+    const data = await ip.json();
+    if (data?.Answer) {
+      return data.Answer[0].data; // Return the first resolved IP
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+};
+
 const GUI_HTML = `<!DOCTYPE html>
 <html>
 <head>
@@ -83,9 +112,10 @@ td, th { padding:10px; border-bottom:1px solid #333; text-align:left; }
 
 <h2>🚀 Proxy Checker Pro+</h2>
 
-<textarea id="ips" placeholder="请输入IP，每行一个：
+<textarea id="ips" placeholder="请输入IP或域名，每行一个：
 1.1.1.1:443
-8.8.8.8:443"></textarea>
+8.8.8.8:443
+example.com"></textarea>
 
 <br>
 <button onclick="start()">开始检测</button>
@@ -94,10 +124,10 @@ td, th { padding:10px; border-bottom:1px solid #333; text-align:left; }
 <table id="table">
 <thead>
 <tr>
-<th>IP</th>
+<th>IP/域名</th>
+<th>类型</th>
 <th>状态</th>
 <th>延迟</th>
-<th>类型</th>
 <th>国家</th>
 <th>地区</th>
 <th>ASN</th>
@@ -130,22 +160,30 @@ async function start() {
     const t0 = Date.now();
 
     let data = {}, ok = false;
+    let ipType = checkIpType(ip);
 
-    try {
-      const result = await scan(ip, 5000, 65536);
-      data = result;
-      ok = result.ok;
-    } catch (e) {
-      data = { error: e.message };
+    if (ipType === 'Domain') {
+      ip = await resolveDomain(ip);
+      ipType = ip ? 'IPv4' : 'Invalid';
+    }
+
+    if (ip) {
+      try {
+        const result = await scan(ip, 5000, 65536);
+        data = result;
+        ok = result.ok;
+      } catch (e) {
+        data = { error: e.message };
+      }
     }
 
     const delay = Date.now() - t0;
     const row = document.createElement("tr");
     row.innerHTML = \`
       <td>\${ip}</td>
+      <td>\${ipType}</td>
       <td class="\${ok ? 'ok' : 'fail'}">\${ok ? '成功' : '失败'}</td>
       <td class="\${speedClass(delay)}">\${delay} ms</td>
-      <td>IPv4</td>
       <td>\${data?.exitCountry || ''}</td>
       <td>\${data?.exitRegion || ''}</td>
       <td>\${data?.exitAsn || ''}</td>
