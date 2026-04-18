@@ -94,7 +94,7 @@ td, th { padding:10px; border-bottom:1px solid #333; text-align:left; }
 
 <h2>🚀 Proxy Checker Pro+</h2>
 
-<textarea id="ips" placeholder="一行一个：
+<textarea id="ips" placeholder="请输入IP，每行一个：
 1.1.1.1:443
 8.8.8.8:443"></textarea>
 
