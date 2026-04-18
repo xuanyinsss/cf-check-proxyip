@@ -233,7 +233,7 @@ async function start() {
     let data = {}, ok = false;
 
     try {
-      const res = await fetch(`https://你的workers地址/?candidate=${ip}`);
+      const res = await fetch(`https://cf-check-proxyip.7723dadie.workers.dev/?candidate=${ip}`);
       data = await res.json();
       ok = data.ok;
     } catch (e) {
