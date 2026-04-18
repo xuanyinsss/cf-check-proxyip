@@ -1,17 +1,10 @@
 import { connect } from 'cloudflare:sockets';
 
-/**
- * merged worker
- * TLS + target worker
- */
-
-// Helper functions and constants
 const TMO = 5000;
 const RDL = 65536;
 const EOL = Uint8Array.of(13, 10);
 const SEP = Uint8Array.of(13, 10, 13, 10);
 
-// Utility functions for processing requests and candidates
 const js = (data, status = 200) => 
   new Response(JSON.stringify(data, null, 2), {
     status,
@@ -67,10 +60,6 @@ const scan = async (raw, to, rl) => {
     };
   }
 };
-
-/**
- * ================== GUI HTML for Proxy Checker ====================
- */
 
 const GUI_HTML = `<!DOCTYPE html>
 <html>
@@ -143,25 +132,25 @@ async function start() {
     let data = {}, ok = false;
 
     try {
-      const res = await fetch(`https://你的workers地址/?candidate=${ip}`);
-      data = await res.json();
-      ok = data.ok;
+      const result = await scan(ip, 5000, 65536);
+      data = result;
+      ok = result.ok;
     } catch (e) {
       data = { error: e.message };
     }
 
     const delay = Date.now() - t0;
     const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${ip}</td>
-      <td class="${ok ? 'ok' : 'fail'}">${ok ? '成功' : '失败'}</td>
-      <td class="${speedClass(delay)}">${delay} ms</td>
+    row.innerHTML = \`
+      <td>\${ip}</td>
+      <td class="\${ok ? 'ok' : 'fail'}">\${ok ? '成功' : '失败'}</td>
+      <td class="\${speedClass(delay)}">\${delay} ms</td>
       <td>IPv4</td>
-      <td>${data?.exitCountry || ''}</td>
-      <td>${data?.exitRegion || ''}</td>
-      <td>${data?.exitAsn || ''}</td>
-      <td>${data?.exitOrg || ''}</td>
-    `;
+      <td>\${data?.exitCountry || ''}</td>
+      <td>\${data?.exitRegion || ''}</td>
+      <td>\${data?.exitAsn || ''}</td>
+      <td>\${data?.exitOrg || ''}</td>
+    \`;
     tbody.appendChild(row);
   }));
 }
